@@ -19,7 +19,7 @@
     </h3>
     <div class="search-wrap">
       <div class="search" v-for="(data, index) in pageData" :key="index">
-        <img
+        <Img
           :src="data.Picture.PictureUrl1"
           :alt="data.Picture.PictureDescription1"
         />

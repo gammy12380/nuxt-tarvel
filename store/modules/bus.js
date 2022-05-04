@@ -10,10 +10,9 @@ export default {
         route: [],
         stationName: [],
         stationInfo: [],
-        station: {
-            start: '',
-            end: ''
-        },
+        start: '',
+        end: '',
+        stationDirection: [],
     }),
     mutations: {
         UPDATE_SELECT(state, payload) {
@@ -31,8 +30,9 @@ export default {
             });
         },
         ADD_STATIONSTARTEND(state, payload) {
-            state.station.start = payload.data
-            state.station.end = payload.data
+            state.stationDirection = payload.data
+            state.start = payload.data[0].DepartureStopNameZh
+            state.end = payload.data[0].DestinationStopNameZh
         },
         ADD_STATIONNAME(state, payload) {
             state.stationName = payload.data
@@ -42,9 +42,9 @@ export default {
         },
     },
     actions: {
-        getCityRoute({ commit, state }) {
+        getCityRoute({ commit, state, rootState }) {
             return axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/${state.select.city}?%24top=30&%24format=JSON`, {
-                headers: state.header
+                headers: rootState.header
             }).then(res => {
                 commit('ADD_CITYROUTE', res)
             })
@@ -52,9 +52,9 @@ export default {
                     console.log(err);
                 });
         },
-        getRouteName({ commit, state, dispatch }) {
+        getRouteName({ commit, state, dispatch, rootState }) {
             return axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/${state.select.city}/${encodeURIComponent(state.select.route)}?%24top=30&%24format=JSON`, {
-                headers: state.header
+                headers: rootState.header
             }).then(res => {
                 commit('ADD_STATIONNAME', res)
                 dispatch('getRouteInfo')
@@ -64,9 +64,9 @@ export default {
                     console.log(err);
                 });
         },
-        getRouteInfo({ commit, state }) {
+        getRouteInfo({ commit, state, rootState }) {
             return axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/${state.select.city}/${encodeURIComponent(state.select.route)}?%24top=30&%24format=JSON`, {
-                headers: state.header
+                headers: rootState.header
             }).then(res => {
                 commit('ADD_STATIONINFO', res)
             })
@@ -74,10 +74,9 @@ export default {
                     console.log(err);
                 });
         },
-        getRouteStartEnd({ commit, state }) {
-            console.log(12)
+        getRouteStartEnd({ commit, state, rootState }) {
             return axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/${state.select.city}/${encodeURIComponent(state.select.route)}?%24top=30&%24format=JSON`, {
-                headers: state.header
+                headers: rootState.header
             }).then(res => {
                 commit('ADD_STATIONSTARTEND', res)
             })
@@ -87,5 +86,11 @@ export default {
         },
     },
     getters: {
+        getStart(state) {
+            return state.start
+        },
+        getEnd(state) {
+            return state.end
+        },
     }
 }

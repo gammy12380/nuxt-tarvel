@@ -19,7 +19,7 @@
     </h3>
     <div class="restaurant-wrap">
       <div class="restaurant" v-for="h in hotelInfo" :key="h.HotelID" @click="search">
-        <img
+        <Img
           :src="h.Picture.PictureUrl1"
           :alt="h.Picture.PictureDescription1"
         />

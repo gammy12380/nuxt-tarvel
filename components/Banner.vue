@@ -8,7 +8,6 @@
               <img
                 src="@/assets/imgs/welcome_to_taiwan.svg"
                 alt="welcome_to_taiwan"
-                b
               />
             </h2>
             <span>台北、台中、台南、屏東、宜蘭……遊遍台灣</span>
@@ -72,15 +71,15 @@
           </button>
         </div>
       </div>
-      <div class="bus-station">
-        <div class="station">往蘭萍</div>
-        <div class="station">往大溪</div>
+      <div class="bus-station" v-if="subRoute">
+        <div class="station">往{{ getStart }}</div>
+        <div class="station">往{{ getEnd }}</div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { mapActions, mapMutations, mapState } from "vuex";
+import { mapActions, mapMutations, mapState, mapGetters } from "vuex";
 import { ADD_SEARCHTYPE } from "../store/mutations-type";
 export default {
   name: "Banner",
@@ -99,6 +98,9 @@ export default {
         city: "選擇縣市",
         route: "",
       },
+      subRoute: false,
+      start: "",
+      end: "",
       select: {
         type: ["景點", "活動", "餐廳", "住宿"],
         countys: [
@@ -132,7 +134,9 @@ export default {
     ...mapState("modules/bus", {
       cityRoute: (state) => state.cityRoute,
       busSelect: (state) => state.select,
+      stationDirection: (state) => state.stationDirection,
     }),
+    ...mapGetters("modules/bus", ["getStart", "getEnd"]),
   },
   methods: {
     ...mapMutations({
@@ -147,6 +151,7 @@ export default {
       searchRestaurant: "searchRestaurant",
       getCityRoute: "modules/bus/getCityRoute",
       getRouteName: "modules/bus/getRouteName",
+      getRouteInfo: "modules/bus/getRouteInfo",
     }),
     searchHandler() {
       if (this.search.type !== "類別" && this.search.county !== "不分縣市") {
@@ -189,6 +194,21 @@ export default {
     },
     searchRouteName() {
       this.getRouteName();
+      this.getRouteInfo();
+      this.checkSubRoute();
+    },
+    checkSubRoute() {
+      if (this.stationDirection.length > 2) {
+        console.log(this.stationDirection.length);
+        this.subRoute = false;
+      } else {
+        console.log(this.stationDirection.length);
+        this.subRoute = true;
+      }
+    },
+    updateStartEnd() {
+      this.start = this.getStart;
+      this.end = this.getEnd;
     },
   },
 
@@ -198,6 +218,12 @@ export default {
     },
     "bus.route": function () {
       this.updateRouteName();
+    },
+    getStart() {
+      this.getStart;
+    },
+    getEnd() {
+      this.getEnd;
     },
   },
 };

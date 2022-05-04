@@ -16,7 +16,7 @@
         <div class="activity" v-for="data in pageData" :key="data.ActivityID">
           <div class="activity-mobile-btn" @click="openModal(data)"></div>
           <div class="activity-img">
-            <img
+            <Img
               :src="data.Picture.PictureUrl1"
               :alt="data.Picture.PictureDescription1"
             />

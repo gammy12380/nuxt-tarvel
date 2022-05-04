@@ -87,7 +87,7 @@
           </defs>
         </svg>
       </div>
-      <img
+      <Img
         :src="pictureCycle(modalData.Picture)"
         :alt="picDescriptionCycle(modalData.Picture)"
         class="modalImg"
