@@ -5,10 +5,7 @@
         <div class="search-container">
           <div class="banner-title" v-if="!bannerImg.backNone">
             <h2>
-              <img
-                src="@/assets/imgs/welcome_to_taiwan.svg"
-                alt="welcome_to_taiwan"
-              />
+              <img src="@/assets/imgs/welcome_to_taiwan.svg" alt="welcome_to_taiwan" />
             </h2>
             <span>台北、台中、台南、屏東、宜蘭……遊遍台灣</span>
           </div>
@@ -21,18 +18,9 @@
                   {{ type }}
                 </option>
               </select>
-              <select
-                name="searchCounty"
-                id="searchCounty"
-                v-model="search.county"
-              >
+              <select name="searchCounty" id="searchCounty" v-model="search.county">
                 <option selected disabled>不分縣市</option>
-                <option
-                  selected
-                  v-for="(county, index) in select.countys"
-                  :key="index"
-                  :value="county.en"
-                >
+                <option selected v-for="(county, index) in select.countys" :key="index" :value="county.en">
                   {{ county.county }}
                 </option>
               </select>
@@ -50,12 +38,7 @@
         <div class="search-type">
           <select name="searchType" id="searchType" v-model="bus.city">
             <option selected disabled>選擇縣市</option>
-            <option
-              selected
-              v-for="(county, index) in select.countys"
-              :key="index"
-              :value="county.en"
-            >
+            <option selected v-for="(county, index) in select.countys" :key="index" :value="county.en">
               {{ county.county }}
             </option>
           </select>
@@ -70,10 +53,21 @@
             <span class="mobile-submit">送出</span>
           </button>
         </div>
+        <div class="search-bus-route" v-if="this.routeStatus.sub">
+          <select name="searchRoute" id="searchRoute" v-model="bus.subRoute">
+            <option selected disabled>請選擇分線</option>
+            <option v-for="(busRoute, index) in route" :key="index">
+              {{ busRoute }}
+            </option>
+          </select>
+        </div>
       </div>
-      <div class="bus-station" v-if="subRoute">
-        <div class="station">往{{ getStart }}</div>
-        <div class="station">往{{ getEnd }}</div>
+
+      <div class="bus-station" v-if="this.routeStatus.station">
+        <div class="station" :class="{ 'station-active': stationDirection }" @click="updateDirection(0)">往{{ end }}
+        </div>
+        <div class="station" :class="{ 'station-active': !stationDirection }" @click="updateDirection(1)">往{{ start }}
+        </div>
       </div>
     </div>
   </div>
@@ -94,13 +88,16 @@ export default {
         type: "類別",
         county: "不分縣市",
       },
+      routeStatus: {
+        sub: false,
+        station: false,
+      },
       bus: {
         city: "選擇縣市",
         route: "",
+        subRoute: "請選擇分線",
       },
-      subRoute: false,
-      start: "",
-      end: "",
+      route: [],
       select: {
         type: ["景點", "活動", "餐廳", "住宿"],
         countys: [
@@ -132,17 +129,22 @@ export default {
   },
   computed: {
     ...mapState("modules/bus", {
+      stationDirection: (state) => state.direction,
       cityRoute: (state) => state.cityRoute,
-      busSelect: (state) => state.select,
-      stationDirection: (state) => state.stationDirection,
+      stationSelect: (state) => state.select,
+      subRoute: (state) => state.subRoute,
+      start: (state) => state.start,
+      end: (state) => state.end,
+      stationRoute: (state) => state.stationRoute,
     }),
-    ...mapGetters("modules/bus", ["getStart", "getEnd"]),
   },
   methods: {
     ...mapMutations({
       searchType: ADD_SEARCHTYPE,
       addCity: "modules/bus/ADD_CITY",
       upadateSelect: "modules/bus/UPDATE_SELECT",
+      filterStation: "modules/bus/filterStation",
+      updateDirection: "modules/bus/UPDATE_DIRECTION",
     }),
     ...mapActions({
       searchScenicSpot: "searchScenicSpot",
@@ -150,8 +152,9 @@ export default {
       searchHotel: "searchHotel",
       searchRestaurant: "searchRestaurant",
       getCityRoute: "modules/bus/getCityRoute",
-      getRouteName: "modules/bus/getRouteName",
-      getRouteInfo: "modules/bus/getRouteInfo",
+      getStopOfRoute: "modules/bus/getStopOfRoute",
+      getEstimatedTimeOfArrival: "modules/bus/getEstimatedTimeOfArrival",
+      getRoute: "modules/bus/getRoute",
     }),
     searchHandler() {
       if (this.search.type !== "類別" && this.search.county !== "不分縣市") {
@@ -190,40 +193,51 @@ export default {
       });
     },
     updateRouteName() {
-      this.upadateSelect(this.bus.route);
+      this.upadateSelect(this.bus);
     },
-    searchRouteName() {
-      this.getRouteName();
-      this.getRouteInfo();
+    async searchRouteName() {
+      if (this.bus.city === "" || this.bus.route === "") return alert('請選擇縣市和路線')
+      await Promise.all([
+        this.getStopOfRoute(),
+        this.getEstimatedTimeOfArrival(),
+        this.getRoute(),
+      ]);
       this.checkSubRoute();
     },
     checkSubRoute() {
-      if (this.stationDirection.length > 2) {
-        console.log(this.stationDirection.length);
-        this.subRoute = false;
+      if (this.stationRoute.length === 0) return alert('搜尋不到你要的公車資料')
+      if (this.stationRoute.length > 1) {
+        this.filterRoute();
+        this.routeStatus.sub = true;
+        this.routeStatus.station = false;
       } else {
-        console.log(this.stationDirection.length);
-        this.subRoute = true;
+        this.filterRoute();
+        this.filterStation();
+        this.routeStatus.sub = false;
+        this.routeStatus.station = true;
       }
     },
-    updateStartEnd() {
-      this.start = this.getStart;
-      this.end = this.getEnd;
+    filterRoute() {
+      this.route = this.stationRoute.map((item) => {
+        return item.RouteName.Zh_tw;
+      });
+    },
+    showStation() {
+      this.routeStatus.station = true;
+      this.filterStation();
     },
   },
 
   watch: {
-    "bus.city": function () {
+    "bus.city"() {
       this.getBusRoute();
     },
-    "bus.route": function () {
+    "bus.route"() {
       this.updateRouteName();
     },
-    getStart() {
-      this.getStart;
-    },
-    getEnd() {
-      this.getEnd;
+    "bus.subRoute"() {
+      this.updateRouteName();
+      this.showStation();
     },
   },
 };
@@ -234,9 +248,11 @@ export default {
   border-radius: 8px;
   box-shadow: 0px 4px 3px rgba(0, 0, 0, 0.2);
 }
+
 .banner-container {
   @include Center;
 }
+
 .banner-wrap,
 .search-container {
   @include Center;
@@ -250,6 +266,7 @@ export default {
   padding: 30px;
   margin-bottom: 30px;
   background: #fff;
+
   &::before,
   &::after {
     content: "";
@@ -263,52 +280,64 @@ export default {
     opacity: 0.3;
     filter: blur(4px);
   }
+
   &::before {
     left: 10px;
     transform: rotate(-5deg);
   }
+
   &::after {
     right: 10px;
     transform: rotate(5deg);
   }
 }
+
 .banner-bus {
   padding-bottom: 0;
 }
+
 .banner {
   @include Center;
   width: 100%;
   height: 490px;
 }
+
 .bannerIndex {
   background: url("@/assets/imgs/Banner_Taiwan.jpg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
 }
+
 .bannerDelicacy {
   background: url("@/assets/imgs/Banner_Food.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
 }
+
 .backNone {
   background: none;
   height: auto;
 }
+
 .banner-title {
   margin: 15px 0;
 }
+
 .search-container {
   @include Center;
   flex-direction: column;
+
   span {
     width: 100%;
     color: #fff;
     text-align: start;
   }
+
   .search-wrap {
     width: 100%;
+
     input {
       box-sizing: border-box;
       width: 100%;
@@ -322,13 +351,16 @@ export default {
     }
   }
 }
+
 .mobile-submit {
   display: none;
 }
+
 .search-type {
   width: 100%;
   display: flex;
   align-items: center;
+
   select {
     @include borderbox;
     width: 219px;
@@ -338,14 +370,17 @@ export default {
     border: none;
     font-size: 16px;
     padding: 8.5px 24px;
+
     &:focus {
       box-shadow: 0px 2px 4px #ff1d6c;
     }
   }
+
   select:nth-of-type(1),
   select:nth-of-type(2) {
     margin-right: 8px;
   }
+
   button {
     @include Center;
     background: #ff1d6c;
@@ -356,26 +391,53 @@ export default {
     border: none;
     line-height: 24px;
     cursor: pointer;
+
     svg {
       @include fillup;
     }
   }
 }
+
+.search-bus-route {
+  width: 100%;
+
+  select {
+    @include borderbox;
+    width: 100%;
+    height: 40px;
+    margin: 15px 0 30px;
+    outline: none;
+    border: none;
+    font-size: 16px;
+    padding: 8.5px 24px;
+
+    &:focus {
+      box-shadow: 0px 2px 4px #ff1d6c;
+    }
+  }
+}
+
 .bus-station {
   display: flex;
   justify-content: space-around;
+
   .station {
     width: 250px;
     text-align: center;
     margin-top: 30px;
     padding-bottom: 15px;
     font-size: 18px;
-    font-weight: bold;
-    border-bottom: 4px solid #ff1d6c;
+    cursor: pointer;
+
     &:nth-of-type(1) {
       margin-right: 30px;
     }
   }
+}
+
+.station-active {
+  border-bottom: 4px solid #ff1d6c;
+  font-weight: bold;
 }
 
 @media screen and (max-width: 1199px) {
@@ -383,30 +445,36 @@ export default {
     width: 100%;
   }
 }
+
 @media screen and (max-width: 768px) {
   .banner-wrap {
     background: none;
     margin-top: 30px;
     margin-bottom: 0;
+
     &::before,
     &::after {
       display: none;
     }
+
     .banner {
       width: 100%;
       height: 100%;
       background: none;
     }
+
     .banner-title {
       display: none;
     }
   }
 }
+
 @media screen and (max-width: 575px) {
   .banner-wrap {
     background: #fff;
     margin: 15px 0 30px;
     padding: 15px;
+
     &::before,
     &::after {
       content: "";
@@ -420,43 +488,53 @@ export default {
       opacity: 0.3;
       filter: blur(4px);
     }
+
     &::before {
       left: 10px;
       transform: rotate(-5deg);
     }
+
     &::after {
       right: 10px;
       transform: rotate(5deg);
     }
+
     .banner {
       width: 100%;
       height: 100%;
       background: none;
+
       .search-container {
         flex: 1;
+
         #searchType,
         #searchCounty {
           box-shadow: 0px 2px 4px rgba(13, 11, 12, 0.2);
           width: auto;
           flex: 1;
+
           &:focus {
             box-shadow: 0px 2px 4px #ff1d6c;
           }
         }
+
         input {
           display: none;
         }
+
         button {
           .mobile-submit {
             display: block;
             font-size: 14px;
           }
+
           img {
             display: none;
           }
         }
       }
     }
+
     .banner-title {
       display: none;
     }

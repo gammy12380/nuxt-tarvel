@@ -2,24 +2,15 @@
   <div class="hotActivity-wrap">
     <div class="hotActivity">
       <h3>
-        <svg
-          width="20"
-          height="17"
-          viewBox="0 0 20 17"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M10 0L0 16.1905H20L10 0Z" fill="#FF1D6C" /></svg
-        >熱門活動
+        <svg width="20" height="17" viewBox="0 0 20 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 0L0 16.1905H20L10 0Z" fill="#FF1D6C" />
+        </svg>熱門活動
       </h3>
       <div class="activity-box">
         <div class="activity" v-for="data in pageData" :key="data.ActivityID">
           <div class="activity-mobile-btn" @click="openModal(data)"></div>
           <div class="activity-img">
-            <Img
-              :src="data.Picture.PictureUrl1"
-              :alt="data.Picture.PictureDescription1"
-            />
+            <Img :src="data.Picture.PictureUrl1" :alt="data.Picture.PictureDescription1" />
           </div>
           <div class="textBox">
             <h4>{{ data.ActivityName }}</h4>
@@ -41,23 +32,14 @@
         </div>
       </div>
       <div class="pagination">
-        <button
-          class="prev-btn"
-          :class="{ 'disabled-btn': pagination.currentPage === 1 }"
-          @click="togglePrevPage"
-          :disabled="pagination.currentPage === 1"
-        ></button>
+        <button class="prev-btn" :class="{ 'disabled-btn': pagination.currentPage === 1 }" @click="togglePrevPage"
+          :disabled="pagination.currentPage === 1"></button>
         <div class="curpage">
           {{ pagination.currentPage + " / " + pagination.totalPage }}
         </div>
-        <button
-          class="next-btn"
-          :class="{
-            'disabled-btn': pagination.currentPage === pagination.totalPage,
-          }"
-          @click="toggleNextPage"
-          :disabled="pagination.currentPage === pagination.totalPage"
-        ></button>
+        <button class="next-btn" :class="{
+          'disabled-btn': pagination.currentPage === pagination.totalPage,
+        }" @click="toggleNextPage" :disabled="pagination.currentPage === pagination.totalPage"></button>
       </div>
     </div>
     <Modal v-if="this.$store.state.modalSwitch" />
@@ -93,12 +75,12 @@ export default {
     initPage() {
       this.cacthData = this.activity;
       this.pagination.totalPage = Math.ceil(this.cacthData.length / 4);
-      this.pageData = this.fillterData();
-      this.fillterData();
+      this.pageData = this.filterData();
+      this.filterData();
     },
-    fillterData() {
-      const fillterData = this.cacthData.slice(this.minPage, this.maxPage + 1);
-      return fillterData;
+    filterData() {
+      const filterData = this.cacthData.slice(this.minPage, this.maxPage + 1);
+      return filterData;
     },
     checkTextLength(text) {
       const maxLengh = 100;
@@ -117,7 +99,7 @@ export default {
   },
   watch: {
     "pagination.currentPage": function () {
-      this.pageData = this.fillterData();
+      this.pageData = this.filterData();
     },
   },
   created() {
@@ -131,24 +113,29 @@ export default {
   margin: 50px 0;
   @include Center;
 }
+
 .hotActivity {
   width: 1200px;
   @include Center;
   flex-direction: column;
+
   h3 {
     font-size: 20px;
     line-height: 20px;
     display: flex;
+
     svg {
       margin-right: 10px;
     }
   }
 }
+
 .activity-box {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
 }
+
 .activity {
   position: relative;
   background: #fff;
@@ -156,6 +143,7 @@ export default {
   padding: 15px;
   display: flex;
   margin: 15px;
+
   &::before,
   &::after {
     content: "";
@@ -169,31 +157,38 @@ export default {
     opacity: 0.3;
     filter: blur(4px);
   }
+
   &::before {
     left: 10px;
     transform: rotate(-7deg);
   }
+
   &::after {
     right: 10px;
     transform: rotate(7deg);
   }
+
   .activity-img {
     width: 187px;
     height: 196px;
     margin-right: 15px;
+
     img {
       width: 100%;
       height: 100%;
       vertical-align: middle;
     }
   }
+
   .textBox {
     flex: 1;
     height: 100px;
+
     h4 {
       margin: 0;
       font-size: 16px;
     }
+
     p {
       height: 90px;
       line-height: 1.3;
@@ -208,15 +203,18 @@ export default {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
+
   .position-wrap {
     display: flex;
     align-items: center;
+
     img {
       width: 20px;
       height: 25px;
       margin-right: 5px;
     }
   }
+
   .activity-btn {
     cursor: pointer;
     border: 2px solid #ff1d6c;
@@ -226,12 +224,14 @@ export default {
     background: none;
     border-radius: 15px;
     transition: 0.25s ease-in-out;
+
     &:hover {
       box-shadow: inset 150px 0 0 0 #ff1d6c;
       color: #fff;
     }
   }
 }
+
 .pagination {
   display: flex;
   align-items: center;
@@ -248,8 +248,10 @@ export default {
     border: none;
     box-shadow: 0px 4px 3px rgba(13, 11, 12, 0.2);
   }
+
   .prev-btn {
     right: 0;
+
     &::before {
       content: "";
       display: block;
@@ -260,8 +262,10 @@ export default {
       border-bottom: 8px solid transparent;
     }
   }
+
   .next-btn {
     left: 0;
+
     &::before {
       content: "";
       display: block;
@@ -272,10 +276,12 @@ export default {
       border-bottom: 8px solid transparent;
     }
   }
+
   .disabled-btn {
     background: #aaa;
   }
 }
+
 .activity-mobile-btn {
   width: 100%;
   height: 100%;
@@ -285,56 +291,70 @@ export default {
   z-index: 10;
   display: none;
 }
+
 @media screen and (max-width: 1199px) {
   .hotActivity {
     width: 960px;
   }
 }
+
 @media screen and (max-width: 991px) {
   .hotActivity {
     width: 720px;
   }
+
   .activity-box {
     justify-content: center;
   }
+
   .activity {
     position: relative;
     background: #fff;
     width: 80%;
   }
 }
+
 @media screen and (max-width: 767px) {
   .textBox {
     .text-content {
       height: 120px;
+
       p {
         display: none;
       }
     }
   }
 }
+
 @media screen and (max-width: 575px) {
   .activity {
     width: 100%;
     margin: 15px 30px;
+
     .activity-btn {
       display: none;
     }
+
     .activity-mobile-btn {
       display: block;
     }
+
     .activity-img {
       width: 92px;
       height: 96px;
     }
+
     .textBox {
       position: relative;
+
       h4 {
         font-size: 14px;
       }
+
       .text-content {
         height: auto;
       }
+
       .activity-btn-wrap {
         position: absolute;
         bottom: 0;
