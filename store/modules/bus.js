@@ -33,7 +33,6 @@ export default {
             state.cityRoute = payload.data.map((item) => {
                 const busInfo = item.RouteName;
                 busInfo.id = item.RouteUID;
-                state.routeId = item.RouteID;
                 return busInfo;
             });
         },

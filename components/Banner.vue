@@ -5,7 +5,10 @@
         <div class="search-container">
           <div class="banner-title" v-if="!bannerImg.backNone">
             <h2>
-              <img src="@/assets/imgs/welcome_to_taiwan.svg" alt="welcome_to_taiwan" />
+              <img
+                src="@/assets/imgs/welcome_to_taiwan.svg"
+                alt="welcome_to_taiwan"
+              />
             </h2>
             <span>台北、台中、台南、屏東、宜蘭……遊遍台灣</span>
           </div>
@@ -18,9 +21,18 @@
                   {{ type }}
                 </option>
               </select>
-              <select name="searchCounty" id="searchCounty" v-model="search.county">
+              <select
+                name="searchCounty"
+                id="searchCounty"
+                v-model="search.county"
+              >
                 <option selected disabled>不分縣市</option>
-                <option selected v-for="(county, index) in select.countys" :key="index" :value="county.en">
+                <option
+                  selected
+                  v-for="(county, index) in select.countys"
+                  :key="index"
+                  :value="county.en"
+                >
                   {{ county.county }}
                 </option>
               </select>
@@ -38,7 +50,12 @@
         <div class="search-type">
           <select name="searchType" id="searchType" v-model="bus.city">
             <option selected disabled>選擇縣市</option>
-            <option selected v-for="(county, index) in select.countys" :key="index" :value="county.en">
+            <option
+              selected
+              v-for="(county, index) in select.countys"
+              :key="index"
+              :value="county.en"
+            >
               {{ county.county }}
             </option>
           </select>
@@ -64,9 +81,19 @@
       </div>
 
       <div class="bus-station" v-if="this.routeStatus.station">
-        <div class="station" :class="{ 'station-active': stationDirection }" @click="updateDirection(0)">往{{ end }}
+        <div
+          class="station"
+          :class="{ 'station-active': stationDirection }"
+          @click="updateDirection(0)"
+        >
+          往{{ end }}
         </div>
-        <div class="station" :class="{ 'station-active': !stationDirection }" @click="updateDirection(1)">往{{ start }}
+        <div
+          class="station"
+          :class="{ 'station-active': !stationDirection }"
+          @click="updateDirection(1)"
+        >
+          往{{ start }}
         </div>
       </div>
     </div>
@@ -185,18 +212,12 @@ export default {
       this.addCity(this.bus.city);
       this.getCityRoute();
     },
-    getBusName() {
-      this.busRouteName = this.cityRoute.map((item) => {
-        const busInfo = item.RouteName;
-        busInfo.id = item.RouteUID;
-        return busInfo;
-      });
-    },
     updateRouteName() {
       this.upadateSelect(this.bus);
     },
     async searchRouteName() {
-      if (this.bus.city === "" || this.bus.route === "") return alert('請選擇縣市和路線')
+      if (this.bus.city === "" || this.bus.route === "")
+        return alert("請選擇縣市和路線");
       await Promise.all([
         this.getStopOfRoute(),
         this.getEstimatedTimeOfArrival(),
@@ -205,7 +226,8 @@ export default {
       this.checkSubRoute();
     },
     checkSubRoute() {
-      if (this.stationRoute.length === 0) return alert('搜尋不到你要的公車資料')
+      if (this.stationRoute.length === 0)
+        return alert("搜尋不到你要的公車資料");
       if (this.stationRoute.length > 1) {
         this.filterRoute();
         this.routeStatus.sub = true;
