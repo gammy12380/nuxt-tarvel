@@ -12,5 +12,8 @@ export default {
   },
   methods: {},
   mounted() {},
+  fetch({ store }) {
+    store.dispatch("getHeader");
+  },
 };
 </script>

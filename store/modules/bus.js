@@ -66,6 +66,7 @@ export default {
                 headers: rootState.header
             }).then(res => {
                 commit('ADD_CITYROUTE', res)
+                console.log(rootState.header)
             })
                 .catch(err => {
                     console.log(err);

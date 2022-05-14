@@ -1,7 +1,10 @@
 <template>
   <div class="container">
+    <div class="station-update">
+      <span>*每隔15秒自動更新{{ count }}</span>
+    </div>
     <div class="station-wrap">
-      <div class="station-update"><span>*每隔15秒自動更新</span></div>
+      <h2 v-if="!routeId">請選擇公車路線</h2>
       <div class="station" v-if="stationDirection">
         <div class="station-col">
           <div
@@ -9,7 +12,9 @@
             v-for="(stop, index) in goStopsFirst"
             :key="index"
           >
-            <div class="station-time">{{ checkStopStatus(stop) }}</div>
+            <div class="station-time" :class="changeStationClass(stop)">
+              {{ checkStopStatus(stop) }}
+            </div>
             <div class="station-name">{{ stop.StopName.Zh_tw }}</div>
           </div>
         </div>
@@ -19,7 +24,9 @@
             v-for="(stop, index) in goStopsSecond"
             :key="index"
           >
-            <div class="station-time">{{ checkStopStatus(stop) }}</div>
+            <div class="station-time" :class="changeStationClass(stop)">
+              {{ checkStopStatus(stop) }}
+            </div>
             <div class="station-name">{{ stop.StopName.Zh_tw }}</div>
           </div>
         </div>
@@ -31,7 +38,9 @@
             v-for="(stop, index) in backStopsFirst"
             :key="index"
           >
-            <div class="station-time">{{ checkStopStatus(stop) }}</div>
+            <div class="station-time" :class="changeStationClass(stop)">
+              {{ checkStopStatus(stop) }}
+            </div>
             <div class="station-name">{{ stop.StopName.Zh_tw }}</div>
           </div>
         </div>
@@ -41,7 +50,9 @@
             v-for="(stop, index) in backStopsSecond"
             :key="index"
           >
-            <div class="station-time">{{ checkStopStatus(stop) }}</div>
+            <div class="station-time" :class="changeStationClass(stop)">
+              {{ checkStopStatus(stop) }}
+            </div>
             <div class="station-name">{{ stop.StopName.Zh_tw }}</div>
           </div>
         </div>
@@ -58,6 +69,8 @@ export default {
       backStops: [],
       go: [],
       back: [],
+      count: 0,
+      timer: null,
     };
   },
   computed: {
@@ -84,6 +97,11 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      getStopOfRoute: "modules/bus/getStopOfRoute",
+      getEstimatedTimeOfArrival: "modules/bus/getEstimatedTimeOfArrival",
+      getRoute: "modules/bus/getRoute",
+    }),
     filterStops() {
       this.stationName.forEach((item) => {
         if (item.RouteID === this.routeId && !item.Direction)
@@ -101,6 +119,7 @@ export default {
       this.go.sort(
         (a, b) => goArr.indexOf(a.StopUID) - goArr.indexOf(b.StopUID)
       );
+
       this.back = this.stationInfo.filter(
         (item) => item.RouteID === this.routeId && item.Direction
       );
@@ -111,31 +130,67 @@ export default {
     },
     checkStopStatus({ EstimateTime, StopStatus }) {
       if (StopStatus) {
-        if (StopStatus === 1) {
+        if (!EstimateTime && StopStatus == 1) {
           return "尚未發車";
         } else if (StopStatus === 2) {
           return "交管不停靠";
         } else if (StopStatus === 3) {
           return "末班車已過";
-        } else {
+        } else if (StopStatus === 4) {
           return "今日未營運";
         }
       }
 
       if (EstimateTime) {
-        const minute = EstimateTime > 60 ? Math.floor(EstimateTime / 60) : 0;
-        const sec = parseInt(EstimateTime - minute * 60);
         if (EstimateTime < 60) return "進站中";
-        let time = sec > 60 ? `${minute}分 : ${sec}秒` : `${sec}秒`;
+        let minute = EstimateTime > 60 ? Math.floor(EstimateTime / 60) : 0;
+        let sec = parseInt(EstimateTime - minute * 60);
+        let time = minute >= 1 ? `${minute}分 : ${sec}秒` : `${sec}秒`;
         return time;
       }
       return "離站中";
     },
-    updateTime(time) {},
+    startTimer() {
+      this.count = 0;
+      this.timer = setInterval(() => {
+        this.count++;
+      }, 1000);
+    },
+    changeStationClass({ EstimateTime, StopStatus }) {
+      if (StopStatus) {
+        if (
+          (!EstimateTime && StopStatus == 1) ||
+          StopStatus === 2 ||
+          StopStatus === 3 ||
+          StopStatus === 4
+        )
+          return ["past"];
+      }
+      if (EstimateTime && EstimateTime < 60) return ["stop"];
+      if (!EstimateTime) return ["leave"];
+    },
+    async updateData() {
+      await Promise.all([
+        this.getStopOfRoute(),
+        this.getEstimatedTimeOfArrival(),
+        this.getRoute(),
+      ]);
+      this.filterStops();
+    },
   },
   watch: {
+    stationRoute() {
+      clearInterval(this.timer);
+      this.startTimer();
+    },
     routeId() {
       this.filterStops();
+    },
+    count(val) {
+      if (val === 15) {
+        clearInterval(this.timer);
+        this.updateData();
+      }
     },
   },
 };
@@ -143,17 +198,36 @@ export default {
 <style lang="scss" scoped>
 .container {
   width: 100%;
-  margin: 100px 0;
+  margin: 50px 0;
+  flex-direction: column;
   @include Center;
-
+  .station-update {
+    width: 1200px;
+    color: #ff1d6c;
+    font-size: 16px;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+    margin-right: 15px;
+    span {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 1.6px;
+    }
+  }
   .station-wrap {
-    @include Center;
+    display: flex;
+    align-items: center;
     flex-direction: column;
     width: 1200px;
+    min-height: 600px;
     padding: 50px 75px;
     background: #fff;
     position: relative;
-
+    h2 {
+      color: #acacac;
+      font-size: 24px;
+    }
     &::before,
     &::after {
       content: "";
@@ -177,13 +251,6 @@ export default {
       right: 10px;
       transform: rotate(7deg);
     }
-
-    .station-update {
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      color: #ff1d6c;
-    }
   }
 }
 
@@ -193,7 +260,6 @@ export default {
 
   .station-col {
     flex: 0 0 auto;
-    width: calc(50% -15px);
     margin-right: 15px;
 
     .station-item {
@@ -203,12 +269,25 @@ export default {
 
       .station-time {
         text-align: center;
-        border: 2px solid #0d0b0c;
-        border-radius: 5px;
+        border: 3px solid #0d0b0c;
+        border-radius: 10px;
         width: 160px;
         padding: 10px 15px;
       }
-
+      .stop {
+        border: none;
+        background: #ff1d6c;
+        color: #fff;
+      }
+      .leave {
+        border: none;
+        background: #ffb72c;
+        color: #fff;
+      }
+      .past {
+        border-color: #acacac;
+        color: #acacac;
+      }
       .station-name {
         text-align: center;
         width: 160px;
@@ -217,10 +296,24 @@ export default {
     }
   }
 }
-
+@media screen and (max-width: 1199px) {
+  .station-update,
+  .station-wrap {
+    width: 100% !important;
+  }
+}
+@media screen and (max-width: 991px) {
+  .station-wrap {
+    .station-col {
+      width: calc(50% - 15px);
+      flex: 1 1 auto;
+    }
+  }
+}
 @media screen and (max-width: 768px) {
   .station-wrap {
-    padding: 15px;
+    width: 100% !important;
+    padding: 15px !important;
   }
 
   .station {
@@ -229,7 +322,6 @@ export default {
 
     .station-col {
       flex: 0 0 auto;
-      width: 100%;
 
       .station-item {
         width: 100%;
@@ -238,6 +330,34 @@ export default {
         .station-time {
           width: 50%;
         }
+      }
+    }
+  }
+}
+@media screen and (max-width: 575px) {
+  .container {
+    margin-top: 30px;
+    h2 {
+      font-size: 20px !important;
+    }
+  }
+  .station-update {
+    span {
+      font-size: 16px !important;
+    }
+  }
+  .station-col {
+    width: 100% !important;
+    margin-right: 0 !important;
+    .station-item {
+      width: 100%;
+
+      .station-name {
+        width: fit-content !important;
+      }
+      .station-time {
+        width: 120px !important;
+        margin-right: 15px;
       }
     }
   }

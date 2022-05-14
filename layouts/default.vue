@@ -8,9 +8,7 @@
 <script>
 import "normalize.css/normalize.css";
 export default {
-  created(){
-    this.$router.push('/')
-  }
+  created() {},
 };
 </script>
 <style lang="scss">

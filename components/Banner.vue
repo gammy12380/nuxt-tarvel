@@ -78,22 +78,21 @@
             </option>
           </select>
         </div>
-      </div>
-
-      <div class="bus-station" v-if="this.routeStatus.station">
-        <div
-          class="station"
-          :class="{ 'station-active': stationDirection }"
-          @click="updateDirection(0)"
-        >
-          往{{ end }}
-        </div>
-        <div
-          class="station"
-          :class="{ 'station-active': !stationDirection }"
-          @click="updateDirection(1)"
-        >
-          往{{ start }}
+        <div class="bus-station" v-if="this.routeStatus.station">
+          <div
+            class="station"
+            :class="{ 'station-active': stationDirection }"
+            @click="updateDirection(0)"
+          >
+            往{{ end }}
+          </div>
+          <div
+            class="station"
+            :class="{ 'station-active': !stationDirection }"
+            @click="updateDirection(1)"
+          >
+            往{{ start }}
+          </div>
         </div>
       </div>
     </div>
@@ -121,7 +120,7 @@ export default {
       },
       bus: {
         city: "選擇縣市",
-        route: "",
+        route: "選擇路線",
         subRoute: "請選擇分線",
       },
       route: [],
@@ -252,6 +251,7 @@ export default {
 
   watch: {
     "bus.city"() {
+      this.bus.route = "選擇路線";
       this.getBusRoute();
     },
     "bus.route"() {
@@ -382,7 +382,7 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-
+  margin-bottom: 15px;
   select {
     @include borderbox;
     width: 219px;
@@ -427,10 +427,10 @@ export default {
     @include borderbox;
     width: 100%;
     height: 40px;
-    margin: 15px 0 30px;
     outline: none;
     border: none;
     font-size: 16px;
+    margin-bottom: 15px;
     padding: 8.5px 24px;
 
     &:focus {
@@ -446,8 +446,8 @@ export default {
   .station {
     width: 250px;
     text-align: center;
-    margin-top: 30px;
-    padding-bottom: 15px;
+    margin-top: 15px;
+    padding-bottom: 10px;
     font-size: 18px;
     cursor: pointer;
 
@@ -470,15 +470,6 @@ export default {
 
 @media screen and (max-width: 768px) {
   .banner-wrap {
-    background: none;
-    margin-top: 30px;
-    margin-bottom: 0;
-
-    &::before,
-    &::after {
-      display: none;
-    }
-
     .banner {
       width: 100%;
       height: 100%;
@@ -559,6 +550,33 @@ export default {
 
     .banner-title {
       display: none;
+    }
+  }
+  .banner-bus {
+    margin: 15px 0 30px;
+    .search-wrap-bus {
+      width: 100%;
+      .search-type {
+        display: flex;
+        flex-wrap: wrap;
+        #searchType,
+        #searchCounty {
+          flex: 1 1 auto;
+          width: 1%;
+          min-width: 0;
+        }
+      }
+      .bus-station {
+        width: 100%;
+        .station {
+          margin-right: 0;
+          width: auto;
+          flex-grow: 1;
+          &:nth-of-type(1) {
+            margin-right: 0 !important;
+          }
+        }
+      }
     }
   }
 }

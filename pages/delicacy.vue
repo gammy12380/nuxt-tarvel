@@ -14,7 +14,7 @@ export default {
   methods: {},
   mounted() {},
   async fetch({ store }) {
-    await Promise.all([store.dispatch('getHotel'), store.dispatch('getRestaurant')])
+    await Promise.all([store.dispatch("getHeader"),store.dispatch('getHotel'), store.dispatch('getRestaurant')])
   },
 };
 </script>
