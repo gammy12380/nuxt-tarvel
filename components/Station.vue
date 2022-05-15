@@ -61,7 +61,7 @@
   </div>
 </template>
 <script>
-import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 export default {
   data() {
     return {
@@ -180,8 +180,13 @@ export default {
   },
   watch: {
     stationRoute() {
-      clearInterval(this.timer);
-      this.startTimer();
+      if (this.stationRoute.length === 0) {
+        clearInterval(this.timer);
+        this.count = 0;
+      } else {
+        clearInterval(this.timer);
+        this.startTimer();
+      }
     },
     routeId() {
       this.filterStops();

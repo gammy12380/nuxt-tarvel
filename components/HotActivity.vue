@@ -2,15 +2,24 @@
   <div class="hotActivity-wrap">
     <div class="hotActivity">
       <h3>
-        <svg width="20" height="17" viewBox="0 0 20 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 0L0 16.1905H20L10 0Z" fill="#FF1D6C" />
-        </svg>熱門活動
+        <svg
+          width="20"
+          height="17"
+          viewBox="0 0 20 17"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M10 0L0 16.1905H20L10 0Z" fill="#FF1D6C" /></svg
+        >熱門活動
       </h3>
       <div class="activity-box">
         <div class="activity" v-for="data in pageData" :key="data.ActivityID">
           <div class="activity-mobile-btn" @click="openModal(data)"></div>
           <div class="activity-img">
-            <Img :src="data.Picture.PictureUrl1" :alt="data.Picture.PictureDescription1" />
+            <img
+              :src="data.Picture.PictureUrl1"
+              :alt="data.Picture.PictureDescription1"
+            />
           </div>
           <div class="textBox">
             <h4>{{ data.ActivityName }}</h4>
@@ -22,7 +31,7 @@
             <div class="activity-btn-wrap">
               <div class="position-wrap">
                 <img src="@/assets/imgs/position.svg" alt="position_icon" />
-                <span>{{ data.Location }}</span>
+                <span>{{ checkLocation(data.Location) }}</span>
               </div>
               <button class="activity-btn" @click="openModal(data)">
                 活動詳情
@@ -32,14 +41,23 @@
         </div>
       </div>
       <div class="pagination">
-        <button class="prev-btn" :class="{ 'disabled-btn': pagination.currentPage === 1 }" @click="togglePrevPage"
-          :disabled="pagination.currentPage === 1"></button>
+        <button
+          class="prev-btn"
+          :class="{ 'disabled-btn': pagination.currentPage === 1 }"
+          @click="togglePrevPage"
+          :disabled="pagination.currentPage === 1"
+        ></button>
         <div class="curpage">
           {{ pagination.currentPage + " / " + pagination.totalPage }}
         </div>
-        <button class="next-btn" :class="{
-          'disabled-btn': pagination.currentPage === pagination.totalPage,
-        }" @click="toggleNextPage" :disabled="pagination.currentPage === pagination.totalPage"></button>
+        <button
+          class="next-btn"
+          :class="{
+            'disabled-btn': pagination.currentPage === pagination.totalPage,
+          }"
+          @click="toggleNextPage"
+          :disabled="pagination.currentPage === pagination.totalPage"
+        ></button>
       </div>
     </div>
     <Modal v-if="this.$store.state.modalSwitch" />
@@ -86,6 +104,13 @@ export default {
       const maxLengh = 100;
       if (text.length > maxLengh) {
         return text.slice(0, 100).concat("...");
+      } else {
+        return text;
+      }
+    },
+    checkLocation(text) {
+      if (text === "to see the official site") {
+        return "未提供地址";
       } else {
         return text;
       }

@@ -18,8 +18,13 @@
       熱門住宿
     </h3>
     <div class="restaurant-wrap">
-      <div class="restaurant" v-for="h in hotelInfo" :key="h.HotelID" @click="search">
-        <Img
+      <div
+        class="restaurant"
+        v-for="h in hotelInfo"
+        :key="h.HotelID"
+        @click="search"
+      >
+        <img
           :src="h.Picture.PictureUrl1"
           :alt="h.Picture.PictureDescription1"
         />

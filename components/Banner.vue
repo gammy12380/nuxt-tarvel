@@ -13,7 +13,11 @@
             <span>台北、台中、台南、屏東、宜蘭……遊遍台灣</span>
           </div>
           <div class="search-wrap">
-            <input type="text" placeholder="搜尋關鍵字" />
+            <input
+              type="text"
+              placeholder="搜尋關鍵字"
+              v-model="search.content"
+            />
             <div class="search-type">
               <select name="searchType" id="searchType" v-model="search.type">
                 <option selected disabled>類別</option>
@@ -99,8 +103,14 @@
   </div>
 </template>
 <script>
-import { mapActions, mapMutations, mapState, mapGetters } from "vuex";
+import { mapActions, mapMutations, mapState } from "vuex";
 import { ADD_SEARCHTYPE } from "../store/mutations-type";
+import {
+  UPDATE_SELECT,
+  UPDATE_DIRECTION,
+  UPDATE_SEARCHINFO,
+  FILLTER_STATION,
+} from "../store/modules/mutation-type";
 export default {
   name: "Banner",
   data() {
@@ -113,6 +123,7 @@ export default {
       search: {
         type: "類別",
         county: "不分縣市",
+        content: "",
       },
       routeStatus: {
         sub: false,
@@ -166,44 +177,85 @@ export default {
   },
   methods: {
     ...mapMutations({
-      searchType: ADD_SEARCHTYPE,
+      addSearchType: ADD_SEARCHTYPE,
       addCity: "modules/bus/ADD_CITY",
-      upadateSelect: "modules/bus/UPDATE_SELECT",
-      filterStation: "modules/bus/filterStation",
-      updateDirection: "modules/bus/UPDATE_DIRECTION",
+      upadateSelect: `modules/bus/${UPDATE_SELECT}`,
+      filterStation: `modules/bus/${FILLTER_STATION}`,
+      updateDirection: `modules/bus/${UPDATE_DIRECTION}`,
+      updateSearchInfo: `modules/bus/${UPDATE_SEARCHINFO}`,
     }),
     ...mapActions({
       searchScenicSpot: "searchScenicSpot",
       searchActivity: "searchActivity",
       searchHotel: "searchHotel",
       searchRestaurant: "searchRestaurant",
+      searchScenicSpotContent: "searchScenicSpotContent",
+      searchActivityContent: "searchActivityContent",
+      searchHotelContent: "searchHotelContent",
+      searchRestaurantContent: "searchRestaurantContent",
+      searchScenicSpotCounty: "searchScenicSpotCounty",
+      searchActivityCounty: "searchActivityCounty",
+      searchHotelCounty: "searchHotelCounty",
+      searchRestaurantCounty: "searchRestaurantCounty",
       getCityRoute: "modules/bus/getCityRoute",
       getStopOfRoute: "modules/bus/getStopOfRoute",
       getEstimatedTimeOfArrival: "modules/bus/getEstimatedTimeOfArrival",
       getRoute: "modules/bus/getRoute",
     }),
     searchHandler() {
-      if (this.search.type !== "類別" && this.search.county !== "不分縣市") {
-        this.searchType(this.search);
-        this.checkSearch();
+      if (this.search.content !== "") {
+        this.addSearchType(this.search);
+        if (this.search.type !== "類別" && this.search.county !== "不分縣市") {
+          this.checkSearch("all");
+          this.$router.push("/search");
+          return;
+        } else if (this.search.county !== "不分縣市") {
+          this.checkSearch();
+          this.$router.push("/search");
+          return;
+        } else if (this.search.type !== "類別") {
+          this.checkSearch("無縣市");
+          this.$router.push("/search");
+          return;
+        }
+        this.searchScenicSpotContent();
+        this.$router.push("/search");
+      } else if (
+        this.search.content === "" &&
+        this.search.type !== "類別" &&
+        this.search.county !== "不分縣市"
+      ) {
+        this.addSearchType(this.search);
+        this.checkSearch("無內容");
         this.$router.push("/search");
       } else {
         return alert("請選擇要搜尋的景點和縣市");
       }
     },
-    checkSearch() {
+    checkSearch(searchParam) {
       switch (this.search.type) {
         case "景點":
-          this.searchScenicSpot();
+          if (searchParam === "all") this.searchScenicSpotCounty();
+          if (searchParam === "無縣市") this.searchScenicSpotContent();
+          if (searchParam === "無內容") this.searchScenicSpot();
           break;
         case "活動":
-          this.searchActivity();
+          if (searchParam === "all") this.searchActivityCounty();
+          if (searchParam === "無縣市") this.searchActivityContent();
+          if (searchParam === "無內容") this.searchActivity();
           break;
         case "餐廳":
-          this.searchHotel();
+          if (searchParam === "all") this.searchRestaurantCounty();
+          if (searchParam === "無縣市") this.searchRestaurantContent();
+          if (searchParam === "無內容") this.searchRestaurant();
           break;
         case "住宿":
-          this.searchRestaurant();
+          if (searchParam === "all") this.searchHotelCounty();
+          if (searchParam === "無縣市") this.searchHotelContent();
+          if (searchParam === "無內容") this.searchHotel();
+          break;
+        default:
+          this.searchScenicSpotCounty();
           break;
       }
     },
@@ -217,6 +269,7 @@ export default {
     async searchRouteName() {
       if (this.bus.city === "" || this.bus.route === "")
         return alert("請選擇縣市和路線");
+      this.updateSearchInfo();
       await Promise.all([
         this.getStopOfRoute(),
         this.getEstimatedTimeOfArrival(),

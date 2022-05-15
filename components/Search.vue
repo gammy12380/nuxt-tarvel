@@ -19,14 +19,14 @@
     </h3>
     <div class="search-wrap">
       <div class="search" v-for="(data, index) in pageData" :key="index">
-        <Img
-          :src="data.Picture.PictureUrl1"
-          :alt="data.Picture.PictureDescription1"
+        <img
+          :src="checkPicture(data.Picture)"
+          :alt="checkPictureDescription1(data.Picture)"
         />
         <h4>{{ checkSearchName(data) }}</h4>
         <div class="position-wrap">
           <img src="@/assets/imgs/position.svg" alt="position_icon" />
-          <span>{{ data.Address }}</span>
+          <span>{{ checkAddress(data.Address) }}</span>
         </div>
       </div>
       <div v-show="this.dataStatus">未搜尋到符合的資料</div>
@@ -53,6 +53,7 @@
   </div>
 </template>
 <script>
+import noImg from "../assets/imgs/noImages.png";
 import { mapState } from "vuex";
 export default {
   data() {
@@ -60,6 +61,7 @@ export default {
       dataStatus: false,
       title: "",
       type: "",
+      county: "",
       pageData: [],
       catchData: [],
       pagination: {
@@ -79,15 +81,37 @@ export default {
   },
   methods: {
     checkSearchName(data) {
-      switch (this.type) {
-        case "景點":
-          return data["ScenicSpotName"];
-        case "活動":
-          return data["ActivityName"];
-        case "餐廳":
-          return data["ScenicSpotName"];
-        case "住宿":
-          return data["RestaurantName"];
+      if (data.ScenicSpotName) {
+        return data["ScenicSpotName"];
+      } else if (data.ActivityName) {
+        return data["ActivityName"];
+      } else if (data.HotelName) {
+        return data["HotelName"];
+      } else if (data.RestaurantName) {
+        return data["RestaurantName"];
+      } else {
+        return "未提供名稱";
+      }
+    },
+    checkPicture(img) {
+      if (Object.keys(img).length !== 0) {
+        return img.PictureUrl1;
+      } else {
+        return noImg;
+      }
+    },
+    checkPictureDescription1(img) {
+      if (Object.keys(img).length !== 0) {
+        return img.PictureDescription1;
+      } else {
+        return "noImg";
+      }
+    },
+    checkAddress(address) {
+      if (address === undefined) {
+        return "未提供地址";
+      } else {
+        return address;
       }
     },
     initPage() {
@@ -100,7 +124,11 @@ export default {
     },
     titleHandler() {
       this.type = this.searchType;
-      this.title = `熱門${this.searchType}`;
+      if (this.searchType === "類別") {
+        this.title = "熱門";
+      } else {
+        this.title = `熱門${this.searchType}`;
+      }
     },
     toggleNextPage() {
       this.pagination.currentPage += 1;
@@ -120,8 +148,7 @@ export default {
   },
   watch: {
     "$store.state.searchType": function () {
-      this.type = this.searchType;
-      this.title = `熱門${this.searchType}`;
+      this.titleHandler();
     },
     "$store.state.searchData": function () {
       this.catchData = this.searchData;
@@ -163,7 +190,7 @@ export default {
   flex-wrap: wrap;
 }
 .search {
-  height: 275px;
+  height: 280px;
   cursor: pointer;
   position: relative;
   background: #fff;

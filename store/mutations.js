@@ -15,9 +15,10 @@ export default {
     [ADD_RESTAURANT](state, payload) {
         state.restaurant = payload.data
     },
-    [ADD_SEARCHTYPE](state, { type, county }) {
+    [ADD_SEARCHTYPE](state, { type, county, content }) {
         state.searchCounty = county;
         state.searchType = type;
+        state.searchContent = content;
     },
     [ADD_SEARCH](state, payload) {
         state.searchData = payload.data;

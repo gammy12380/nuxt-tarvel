@@ -20,6 +20,7 @@ export const state = () => ({
     searchData: [],
     searchCounty: null,
     searchType: null,
+    searchContent: null,
 })
 
 export const createStore = () => {

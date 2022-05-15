@@ -25,6 +25,4 @@ footer {
   }
 }
 
-@media screen and (max-width: 1199px) {
-}
 </style>

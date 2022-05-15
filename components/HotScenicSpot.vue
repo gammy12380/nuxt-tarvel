@@ -24,7 +24,7 @@
         :key="rest.ScenicSpotID"
         @click="search"
       >
-        <Img
+        <img
           :src="rest.Picture.PictureUrl1"
           :alt="rest.Picture.PictureDescription1"
         />

@@ -24,7 +24,7 @@
         :key="rest.RestaurantID"
         @click="search"
       >
-        <Img
+        <img
           :src="rest.Picture.PictureUrl1"
           :alt="rest.Picture.PictureDescription1"
         />

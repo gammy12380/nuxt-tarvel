@@ -11,10 +11,10 @@
         <div class="citys-wrap" :class="[citysClass ? 'citys-first' : 'citys-second']">
           <div class="citys" v-for="cityArr in cityArray" :key="cityArr" @click="search(city[cityArr].en)">
             <div class="city">
-              <Img :src="city[cityArr].img" :alt="city[cityArr].en" class="cityImg" />
+              <img :src="city[cityArr].img" :alt="city[cityArr].en" class="cityImg" />
               <div class="bg-opacity"></div>
               <div class="position">
-                <Img
+                <img
                   src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAYAAACEYr13AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADbSURBVHgBpZKBEYIwDEVbzwE6Qt2ADWQEN2AEuwFuoBuIG7ABI+AGuAFuEH88eiLXxhbfXYBL83PJp1otICKDV4UoEHZKPxGt1vqmJCA+IkaKMyCqmLimdOp/xB7HWo0Pi/eg8mFfdls8nFDQItjUuaEe89Zigp7CZtnZinbKLemVtN/CJxeoGzfC+Ck5ww0egYPQv94HcncerYmscUUU0/7nWA03KGk9B29QR/l87s7KKcovN5C4ZIhPKgSlrdKpGDg0FL6ZHj4zSkJo8lsseNJkiWdN+P47qeYFO4udd29zpX8AAAAASUVORK5CYII="
                   alt="position_icon" />
                 <h3>{{ city[cityArr].cn }}</h3>
